@@ -1,4 +1,4 @@
- # 🛍️ NovaTrend - Modern Full Stack eCommerce Platform
+ # 🛍️ AURA_LAXURE - Modern Full Stack eCommerce Platform
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
