@@ -198,7 +198,7 @@ The architecture supports future integration with:
 ### Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/novatrend.git
+git clone https://github.com/yourusername/AURA_LAXURE.git
 ```
 
 ### Install Dependencies
