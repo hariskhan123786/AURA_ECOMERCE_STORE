@@ -1,0 +1,6 @@
+{
+  "name": "Aura Luxe - Premium AI Ecommerce",
+  "description": "Next-generation luxury eCommerce platform featuring AI smart search, real-time Supabase backend integration, multi-gateway payments, admin dashboard, and Apple-grade micro-interactions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
