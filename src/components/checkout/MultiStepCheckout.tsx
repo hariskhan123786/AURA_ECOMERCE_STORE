@@ -36,20 +36,20 @@ export const MultiStepCheckout: React.FC<MultiStepCheckoutProps> = ({
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // FORM STATES
-  const [email, setEmail] = useState(user?.email || 'client@auraluxe.com');
-  const [fullName, setFullName] = useState(user?.fullName || 'Alexander Vance');
-  const [phone, setPhone] = useState('+1 (555) 839-2001');
-  const [street, setStreet] = useState('742 Evergreen Terrace');
-  const [city, setCity] = useState('New York');
-  const [state, setState] = useState('NY');
-  const [zipCode, setZipCode] = useState('10001');
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zipCode, setZipCode] = useState('');
 
   // PAYMENT GATEWAY SELECTION
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('stripe');
-  const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242');
-  const [cardExpiry, setCardExpiry] = useState('12/28');
-  const [cardCvc, setCardCvc] = useState('888');
-  const [mobileWalletNumber, setMobileWalletNumber] = useState('03001234567');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [mobileWalletNumber, setMobileWalletNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 

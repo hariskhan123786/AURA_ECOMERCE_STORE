@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { Category } from '../../types';
 import { ArrowUpRight } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface CategorySectionProps {
   categories: Category[];
@@ -12,8 +17,26 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   categories,
   onSelectCategory,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    gsap.from('.bento-item', {
+      opacity: 0,
+      y: 35,
+      stagger: 0.12,
+      duration: 0.85,
+      ease: 'power4.out',
+      immediateRender: false,
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top bottom',
+        toggleActions: 'play none none none',
+      },
+    });
+  }, { scope: containerRef });
+
   return (
-    <section className="py-12 px-4 sm:px-8 max-w-7xl mx-auto">
+    <section ref={containerRef} className="py-12 px-4 sm:px-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -38,7 +61,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               whileHover={{ y: -6 }}
               transition={{ duration: 0.3 }}
               onClick={() => onSelectCategory(cat.id)}
-              className={`group relative rounded-3xl overflow-hidden glass-panel cursor-pointer min-h-[260px] flex flex-col justify-end p-6 border border-white/20 dark:border-white/10 shadow-xl ${
+              className={`bento-item group relative rounded-3xl overflow-hidden glass-panel cursor-pointer min-h-[260px] flex flex-col justify-end p-6 border border-white/20 dark:border-white/10 shadow-xl ${
                 isLarge ? 'md:col-span-2' : 'md:col-span-1'
               }`}
             >

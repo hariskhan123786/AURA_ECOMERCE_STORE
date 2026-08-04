@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '../../types';
 import { ProductCard } from '../common/ProductCard';
 import { Flame, Clock, ArrowRight, Zap } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface FlashSaleProps {
   products: Product[];
@@ -31,6 +36,21 @@ export const FlashSale: React.FC<FlashSaleProps> = ({ products, onQuickView, onE
   const flashProducts = products.filter((p) => p.isFlashSale || p.discountPercentage);
   const endTime = new Date(Date.now() + 14 * 3600000 + 32 * 60000 + 45000);
   const { hours, minutes, seconds } = useCountdown(endTime);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // GSAP — flash banner entrance + countdown pulse
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top bottom',
+        toggleActions: 'play none none none',
+      },
+    });
+    tl.from('.flash-banner', { opacity: 0, y: 30, duration: 0.7, ease: 'power3.out', immediateRender: false })
+      .from('.flash-time-block', { opacity: 0, scale: 0.7, stagger: 0.1, duration: 0.5, ease: 'back.out(1.8)', immediateRender: false }, '-=0.3')
+      .from('.flash-product-card', { opacity: 0, y: 20, stagger: 0.08, duration: 0.6, ease: 'power3.out', immediateRender: false }, '-=0.2');
+  }, { scope: sectionRef });
 
   if (flashProducts.length === 0) return null;
 
@@ -53,9 +73,9 @@ export const FlashSale: React.FC<FlashSaleProps> = ({ products, onQuickView, onE
   );
 
   return (
-    <section className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
+    <section ref={sectionRef} className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
       {/* FLASH SALE HEADER BANNER */}
-      <div className="glass-panel rounded-3xl sm:rounded-[28px] overflow-hidden mb-8 relative border border-white/15">
+      <div className="flash-banner glass-panel rounded-3xl sm:rounded-[28px] overflow-hidden mb-8 relative border border-white/15">
         {/* Deep dark gradient background */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-[#170A04] to-slate-950" />
 
@@ -101,11 +121,11 @@ export const FlashSale: React.FC<FlashSaleProps> = ({ products, onQuickView, onE
               <span className="uppercase tracking-widest">Sale Ends In</span>
             </div>
             <div className="flex items-center gap-3">
-              <TimeBlock val={hours} label="HRS" />
+              <div className="flash-time-block"><TimeBlock val={hours} label="HRS" /></div>
               <span className="text-white/50 font-black text-2xl mb-3">:</span>
-              <TimeBlock val={minutes} label="MIN" />
+              <div className="flash-time-block"><TimeBlock val={minutes} label="MIN" /></div>
               <span className="text-white/50 font-black text-2xl mb-3">:</span>
-              <TimeBlock val={seconds} label="SEC" />
+              <div className="flash-time-block"><TimeBlock val={seconds} label="SEC" /></div>
             </div>
           </div>
         </div>
@@ -114,14 +134,7 @@ export const FlashSale: React.FC<FlashSaleProps> = ({ products, onQuickView, onE
       {/* FLASH SALE PRODUCTS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {flashProducts.slice(0, 3).map((product, i) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="relative"
-          >
+          <div key={product.id} className="flash-product-card relative">
             <ProductCard product={product} onQuickView={onQuickView} />
             {/* Stock urgency bar */}
             <div className="mt-2.5 px-1">
@@ -144,7 +157,7 @@ export const FlashSale: React.FC<FlashSaleProps> = ({ products, onQuickView, onE
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

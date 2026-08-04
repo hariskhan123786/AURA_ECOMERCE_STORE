@@ -11,7 +11,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 
 // Home sections
-import { HeroSlider } from './components/home/HeroSlider';
+import { HeroCanvas } from './components/home/HeroCanvas';
 import { FlashSale } from './components/home/FlashSale';
 import { CategorySection } from './components/home/CategorySection';
 import { TrendingProducts } from './components/home/TrendingProducts';
@@ -36,6 +36,8 @@ import { SupabaseStatusModal } from './components/common/SupabaseStatusModal';
 import { CompareDrawer } from './components/common/CompareDrawer';
 import { ToastContainer } from './components/common/ToastContainer';
 import { AdminLoginModal } from './components/common/AdminLoginModal';
+import { FluidBackground } from './components/common/FluidBackground';
+import { MagneticCursor, ScrollProgressBar } from './components/common/PremiumEffects';
 
 // Data & Types
 import { dbService } from './lib/supabase';
@@ -135,10 +137,18 @@ function MainApp() {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans antialiased selection:bg-[#FF6B35] selection:text-white transition-colors duration-400">
 
+      {/* SCROLL PROGRESS BAR */}
+      <ScrollProgressBar />
+
+      {/* MAGNETIC CURSOR — desktop only */}
+      <MagneticCursor />
+
+      {/* AMBIENT CANVAS BACKGROUND — physics particles + fluid blobs */}
+      <FluidBackground />
+
       {/* NAVBAR */}
       <Navbar
         onOpenAiAssistant={() => setIsAiModalOpen(true)}
-        onOpenSupabaseStatus={() => setIsSupabaseModalOpen(true)}
         products={products}
         onSelectCategory={handleSelectCategory}
         onSearchQueryChange={setSearchQuery}
@@ -158,7 +168,7 @@ function MainApp() {
                 <SkeletonGrid />
               ) : (
                 <>
-                  <HeroSlider
+                  <HeroCanvas
                     products={products}
                     onSelectProduct={handleSelectProduct}
                     onExploreShop={() => setActiveView('shop')}

@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAdminAuth } from '../../context/AuthContext';
+import { useAdminAuth, useSecretAdminTrigger } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useTheme } from '../../context/ThemeContext';
-import { isSupabaseConfigured } from '../../lib/supabase';
 import { Product } from '../../types';
 import {
   Search,
@@ -13,7 +12,6 @@ import {
   Sun,
   Moon,
   Sparkles,
-  Database,
   ChevronDown,
   LogOut,
   Shield,
@@ -29,7 +27,6 @@ import {
 
 interface NavbarProps {
   onOpenAiAssistant: () => void;
-  onOpenSupabaseStatus: () => void;
   products: Product[];
   onSelectCategory: (catId: string) => void;
   onSearchQueryChange: (q: string) => void;
@@ -48,7 +45,6 @@ const MEGA_MENU_CATEGORIES = [
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAiAssistant,
-  onOpenSupabaseStatus,
   products,
   onSelectCategory,
   onSearchQueryChange,
@@ -60,7 +56,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { openCart, totalItemsCount } = useCart();
   const { wishlist } = useWishlist();
   const { theme, toggleTheme } = useTheme();
-  const configuredSupabase = isSupabaseConfigured();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -68,6 +63,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // ── SECRET ADMIN TRIGGER ─────────────────────────────────────────
+  // Admin login can only be opened via:
+  //   1. Keyboard: Ctrl+Shift+A (Cmd+Shift+A on Mac)
+  //   2. URL hash: /#admin-access
+  //   3. 5 rapid clicks on the invisible dot near the logo
+  const { handleSecretClick } = useSecretAdminTrigger(
+    useCallback(() => openAdminLogin(), [openAdminLogin])
+  );
 
   // Scroll-aware navbar
   useEffect(() => {
@@ -135,13 +139,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveView('home')}
             className="flex items-center gap-2.5 group"
           >
-            <motion.div
-              whileHover={{ scale: 1.08, rotate: 3 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-              className="w-9 h-9 rounded-2xl bg-[#FF6B35] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#FF6B35]/35"
-            >
-              A
-            </motion.div>
+            <div className="relative">
+              <motion.div
+                whileHover={{ scale: 1.08, rotate: 3 }}
+                transition={{ type: 'spring', stiffness: 400 }}
+                className="w-9 h-9 rounded-2xl bg-[#FF6B35] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#FF6B35]/35"
+              >
+                A
+              </motion.div>
+              {/* Secret invisible trigger — 5 rapid clicks opens admin login */}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleSecretClick(); }}
+                className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full opacity-0 cursor-default"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </div>
             <div>
               <span className="font-extrabold text-[17px] tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
                 AURA <span className="text-[#FF6B35]">LUXE</span>
@@ -219,15 +232,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </AnimatePresence>
             </div>
 
-            {isAdminAuthenticated && (
-              <button
-                onClick={() => setActiveView('admin')}
-                className={`${navLinkClass('admin')} flex items-center gap-1`}
-              >
-                <Shield className="w-3.5 h-3.5 text-[#FF6B35]" />
-                Admin
-              </button>
-            )}
           </div>
         </div>
 
@@ -294,19 +298,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="hidden sm:inline">AI Stylist</span>
           </motion.button>
 
-          {/* Supabase Status */}
-          <button
-            onClick={onOpenSupabaseStatus}
-            className={`p-2 rounded-2xl text-[10px] font-semibold flex items-center gap-1 border transition-colors ${
-              configuredSupabase
-                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/25'
-                : 'bg-amber-500/10 text-amber-500 border-amber-500/25'
-            }`}
-            title="Supabase Status"
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span className={`w-1.5 h-1.5 rounded-full bg-current ${configuredSupabase ? 'animate-pulse' : ''}`} />
-          </button>
 
           {/* Theme Toggle */}
           <motion.button
@@ -365,72 +356,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </AnimatePresence>
           </motion.button>
 
-          {/* ADMIN BUTTON */}
-          <div className="relative">
-            {isAdminAuthenticated ? (
-              <div>
-                <button
-                  onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
-                  className="flex items-center gap-2 p-1.5 rounded-2xl glass-pill border border-slate-200 dark:border-slate-800 hover:border-[#FF6B35] transition-colors"
-                >
-                  {admin?.avatarUrl ? (
-                    <img src={admin.avatarUrl} alt="admin" className="w-7 h-7 rounded-xl object-cover" />
-                  ) : (
-                    <div className="w-7 h-7 rounded-xl bg-[#FF6B35]/20 flex items-center justify-center">
-                      <Shield className="w-3.5 h-3.5 text-[#FF6B35]" />
-                    </div>
-                  )}
-                  <span className="hidden sm:block text-[10px] font-bold text-slate-700 dark:text-slate-300 pr-1 max-w-[80px] truncate">
-                    {admin?.fullName?.split(' ')[0]}
-                  </span>
-                </button>
 
-                <AnimatePresence>
-                  {isAdminMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-56 glass-panel-strong rounded-3xl p-4 shadow-2xl border border-white/20 dark:border-white/10 z-50 space-y-2"
-                    >
-                      <div className="pb-3 border-b border-slate-200 dark:border-slate-800">
-                        <p className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                          <Shield className="w-3.5 h-3.5 text-[#FF6B35]" />
-                          {admin?.fullName}
-                        </p>
-                        <p className="text-[10px] text-slate-400 mt-0.5 truncate">{admin?.email}</p>
-                        <span className="mt-1.5 inline-flex px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-[#FF6B35]/15 text-[#FF6B35]">
-                          ADMIN
-                        </span>
-                      </div>
-
-                      <button
-                        onClick={() => { setActiveView('admin'); setIsAdminMenuOpen(false); }}
-                        className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-[#FF6B35] rounded-xl transition-colors flex items-center gap-2"
-                      >
-                        <Shield className="w-3.5 h-3.5" /> Admin Console
-                      </button>
-
-                      <button
-                        onClick={() => { adminLogout(); setIsAdminMenuOpen(false); setActiveView('home'); }}
-                        className="w-full text-left px-3 py-2 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors flex items-center gap-2"
-                      >
-                        <LogOut className="w-3.5 h-3.5" /> Log Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                onClick={openAdminLogin}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2.5 rounded-2xl glass-pill border border-slate-200 dark:border-slate-800 hover:border-[#FF6B35] text-[10px] font-bold text-slate-700 dark:text-slate-300 hover:text-[#FF6B35] transition-all"
-              >
-                <Shield className="w-3.5 h-3.5" /> Admin
-              </motion.button>
-            )}
-          </div>
 
           {/* Mobile Hamburger */}
           <button
@@ -506,18 +432,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 ))}
 
-                {isAdminAuthenticated && (
-                  <button
-                    onClick={() => { setActiveView('admin'); setIsMobileMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
-                      activeView === 'admin'
-                        ? 'bg-[#FF6B35]/10 text-[#FF6B35]'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <Shield className="w-4 h-4" /> Admin Console
-                  </button>
-                )}
+
               </nav>
 
               {/* Categories */}

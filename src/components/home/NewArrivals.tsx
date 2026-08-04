@@ -3,6 +3,11 @@ import { motion } from 'motion/react';
 import { Product } from '../../types';
 import { ProductCard } from '../common/ProductCard';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface NewArrivalsProps {
   products: Product[];
@@ -12,6 +17,7 @@ interface NewArrivalsProps {
 
 export const NewArrivals: React.FC<NewArrivalsProps> = ({ products, onQuickView, onExploreShop }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const newProducts = products.filter((p) => p.isNew).slice(0, 8);
 
   if (newProducts.length === 0) return null;
@@ -22,10 +28,23 @@ export const NewArrivals: React.FC<NewArrivalsProps> = ({ products, onQuickView,
     scrollRef.current.scrollBy({ left: dir === 'right' ? width * 0.75 : -width * 0.75, behavior: 'smooth' });
   };
 
+  // GSAP — header drop-in + product cards cascade
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top bottom',
+        toggleActions: 'play none none none',
+      },
+    });
+    tl.from('.newarrivals-header', { opacity: 0, y: 20, duration: 0.65, ease: 'power3.out', immediateRender: false })
+      .from('.newarrivals-card', { opacity: 0, x: 30, stagger: 0.07, duration: 0.6, ease: 'power3.out', immediateRender: false }, '-=0.3');
+  }, { scope: sectionRef });
+
   return (
-    <section className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
+    <section ref={sectionRef} className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
+      <div className="newarrivals-header flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="geo-badge flex items-center gap-1.5">
@@ -71,14 +90,10 @@ export const NewArrivals: React.FC<NewArrivalsProps> = ({ products, onQuickView,
         className="flex gap-5 overflow-x-auto no-scrollbar pb-4 snap-x snap-mandatory scroll-smooth"
         style={{ scrollbarWidth: 'none' }}
       >
-        {newProducts.map((product, i) => (
-          <motion.div
+        {newProducts.map((product) => (
+          <div
             key={product.id}
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-30px' }}
-            transition={{ duration: 0.4, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-none w-[260px] sm:w-[280px] snap-start"
+            className="newarrivals-card flex-none w-[260px] sm:w-[280px] snap-start"
           >
             {/* NEW badge overlay */}
             <div className="relative">
@@ -87,7 +102,7 @@ export const NewArrivals: React.FC<NewArrivalsProps> = ({ products, onQuickView,
               </div>
               <ProductCard product={product} onQuickView={onQuickView} />
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

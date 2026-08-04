@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Star, CheckCircle, Quote, ThumbsUp, ChevronDown } from 'lucide-react';
 import { INITIAL_REVIEWS } from '../../data/mockData';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const ReviewsSection: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(3);
+  const sectionRef = useRef<HTMLElement>(null);
   const reviews = INITIAL_REVIEWS;
   const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
@@ -14,8 +20,26 @@ export const ReviewsSection: React.FC = () => {
     pct: Math.round((reviews.filter((r) => r.rating === stars).length / reviews.length) * 100),
   }));
 
+  // GSAP — stagger reveal review cards as they enter viewport
+  useGSAP(() => {
+    ScrollTrigger.batch('.review-card', {
+      onEnter: (elements) => {
+        gsap.from(elements, {
+          opacity: 0,
+          y: 30,
+          stagger: 0.1,
+          duration: 0.7,
+          ease: 'power3.out',
+          immediateRender: false,
+        });
+      },
+      start: 'top bottom',
+      once: true,
+    });
+  }, { scope: sectionRef });
+
   return (
-    <section className="py-16 px-4 sm:px-8 max-w-7xl mx-auto">
+    <section ref={sectionRef} className="py-16 px-4 sm:px-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
         <div>
@@ -77,7 +101,7 @@ export const ReviewsSection: React.FC = () => {
               exit={{ opacity: 0, y: -16 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.45, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="glass-panel rounded-3xl p-6 border border-white/20 dark:border-white/10 flex flex-col justify-between gap-4 shadow-lg hover:shadow-xl hover:border-[#FF6B35]/30 transition-all group relative overflow-hidden"
+              className="review-card glass-panel rounded-3xl p-6 border border-white/20 dark:border-white/10 flex flex-col justify-between gap-4 shadow-lg hover:shadow-xl hover:border-[#FF6B35]/30 transition-all group relative overflow-hidden"
             >
               {/* Background quote */}
               <Quote className="w-12 h-12 text-[#FF6B35]/08 absolute top-4 right-4 pointer-events-none group-hover:text-[#FF6B35]/15 transition-colors" />

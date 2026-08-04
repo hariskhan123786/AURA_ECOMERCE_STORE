@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '../../types';
 import { ProductCard } from '../common/ProductCard';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface TrendingProductsProps {
   products: Product[];
@@ -20,10 +25,34 @@ const TABS = [
 
 export const TrendingProducts: React.FC<TrendingProductsProps> = ({ products, onQuickView, onExploreShop }) => {
   const [activeTab, setActiveTab] = useState<string>('all');
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = activeTab === 'all'
     ? products
     : products.filter((p) => p.categoryId === activeTab);
+
+  // Batch-reveal cards as they enter viewport
+  useGSAP(() => {
+    const ctx = gsap.context(() => {
+      ScrollTrigger.batch('.trend-card', {
+        onEnter: (elements) => {
+          gsap.from(elements, {
+            opacity: 0,
+            y: 28,
+            stagger: 0.09,
+            duration: 0.75,
+            ease: 'power3.out',
+            immediateRender: false,
+          });
+        },
+        start: 'top bottom',
+        once: true,
+      });
+    }, gridRef);
+    return () => ctx.revert();
+  }, { scope: gridRef, dependencies: [activeTab] });
+
+
 
   return (
     <section className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
@@ -71,6 +100,7 @@ export const TrendingProducts: React.FC<TrendingProductsProps> = ({ products, on
       {/* Products Grid */}
       <AnimatePresence mode="wait">
         <motion.div
+          ref={gridRef}
           key={activeTab}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,15 +108,10 @@ export const TrendingProducts: React.FC<TrendingProductsProps> = ({ products, on
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
         >
-          {filteredProducts.slice(0, 8).map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
+          {filteredProducts.slice(0, 8).map((product) => (
+            <div key={product.id} className="trend-card">
               <ProductCard product={product} onQuickView={onQuickView} />
-            </motion.div>
+            </div>
           ))}
         </motion.div>
       </AnimatePresence>

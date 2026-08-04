@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useNotification } from '../../context/NotificationContext';
 import { ShoppingBag, Star, ArrowRight, Trophy, Medal, Award } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface BestSellersProps {
   products: Product[];
@@ -20,6 +25,7 @@ const RANK_CONFIG = [
 export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView, onExploreShop }) => {
   const { addToCart } = useCart();
   const { showToast } = useNotification();
+  const sectionRef = useRef<HTMLElement>(null);
 
   const bestSellers = [...products]
     .sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))
@@ -29,8 +35,21 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
 
   const [top, ...rest] = bestSellers;
 
+  // GSAP — cinematic stagger reveal
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top bottom',
+        toggleActions: 'play none none none',
+      },
+    });
+    tl.from('.bestseller-hero', { opacity: 0, x: -40, duration: 0.8, ease: 'power3.out', immediateRender: false })
+      .from('.bestseller-side-card', { opacity: 0, x: 40, stagger: 0.12, duration: 0.7, ease: 'power3.out', immediateRender: false }, '-=0.5');
+  }, { scope: sectionRef });
+
   return (
-    <section className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
+    <section ref={sectionRef} className="py-14 px-4 sm:px-8 max-w-7xl mx-auto">
       {/* Section header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">
         <div>
@@ -59,13 +78,9 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* FEATURED #1 BEST SELLER — large */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        <div
           onClick={() => onQuickView(top)}
-          className={`lg:col-span-5 glass-panel rounded-3xl overflow-hidden border border-white/20 dark:border-white/10 cursor-pointer group relative bg-gradient-to-br ${RANK_CONFIG[0].bg} hover:border-yellow-400/40 transition-all product-card-hover`}
+          className="bestseller-hero lg:col-span-5 glass-panel rounded-3xl overflow-hidden border border-white/20 dark:border-white/10 cursor-pointer group relative bg-gradient-to-br from-yellow-500/20 to-amber-500/05 hover:border-yellow-400/40 transition-all product-card-hover"
         >
           {/* Rank badge */}
           <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400/90 backdrop-blur-md shadow-lg">
@@ -107,7 +122,7 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
               </motion.button>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* RIGHT — Smaller ranked items */}
         <div className="lg:col-span-7 flex flex-col gap-4">
@@ -116,14 +131,10 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
             const RankIcon = rank?.icon || Award;
 
             return (
-              <motion.div
+              <div
                 key={product.id}
-                initial={{ opacity: 0, x: 24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => onQuickView(product)}
-                className="glass-panel rounded-2xl p-4 flex gap-4 items-center cursor-pointer group hover:border-[#FF6B35]/40 hover:shadow-lg transition-all"
+                className="bestseller-side-card glass-panel rounded-2xl p-4 flex gap-4 items-center cursor-pointer group hover:border-[#FF6B35]/40 hover:shadow-lg transition-all"
               >
                 {/* Rank badge */}
                 <div className="shrink-0 w-9 h-9 rounded-2xl flex items-center justify-center font-black text-sm" style={{ backgroundColor: rank?.color + '20', color: rank?.color }}>
@@ -156,7 +167,7 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
                     <ShoppingBag className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -1,6 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Marquee track setup */
+.marquee-track {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  width: max-content !important;
+  flex-shrink: 0 !important;
+}
 
 @layer base {
   :root {
@@ -48,10 +59,16 @@
     scroll-behavior: smooth;
   }
 
+  h1, h2, h3, h4, .font-serif-luxury {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: -0.012em;
+    font-weight: 600;
+  }
+
   body {
     background-color: var(--bg-main);
     color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     transition: background-color 0.4s ease, color 0.4s ease;
     -webkit-font-smoothing: antialiased;
@@ -206,7 +223,7 @@
   50% { box-shadow: 0 0 35px rgba(255,107,53,0.45), 0 0 70px rgba(255,107,53,0.15); }
 }
 
-@keyframes marquee {
+@keyframes brands-marquee-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
@@ -261,12 +278,90 @@
 .animate-float { animation: float 5s ease-in-out infinite; }
 .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
-.animate-marquee { animation: marquee 25s linear infinite; }
+.brands-marquee-scroll { animation: brands-marquee-scroll 25s linear infinite !important; }
 .animate-marquee-reverse { animation: marquee-reverse 28s linear infinite; }
 .animate-fade-up { animation: fade-up 0.5s ease forwards; }
 .animate-fade-in { animation: fade-in 0.4s ease forwards; }
 .animate-spin-slow { animation: spin-slow 12s linear infinite; }
 .animate-blob { animation: blob 8s ease-in-out infinite; }
+
+/* ── PREMIUM MOTION EXTRAS (motion-design skill) ── */
+@keyframes iridescent {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glow-text {
+  0%, 100% { text-shadow: 0 0 10px rgba(255,107,53,0.3); }
+  50%       { text-shadow: 0 0 25px rgba(255,107,53,0.7), 0 0 50px rgba(255,107,53,0.3); }
+}
+
+@keyframes border-rotate {
+  0%   { --border-angle: 0turn; }
+  100% { --border-angle: 1turn; }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-iridescent {
+  background: linear-gradient(270deg, #FF6B35, #FFAB76, #fbbf24, #f97316, #FF6B35);
+  background-size: 300% 300%;
+  animation: iridescent 5s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animate-glow-text {
+  animation: glow-text 2.5s ease-in-out infinite;
+  color: #FF6B35;
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Magnetic hover — smooth micro-lift on interactive elements */
+.magnetic-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.magnetic-hover:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 12px 32px rgba(255,107,53,0.18);
+}
+
+/* Custom cursor active — hide system cursor when MagneticCursor is mounted */
+@media (hover: hover) {
+  body { cursor: none; }
+  a, button, [role="button"], input, select, textarea, label, .cursor-pointer {
+    cursor: none;
+  }
+}
+
+/* Prefers reduced motion — disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-marquee, .animate-marquee-reverse {
+    animation: none !important;
+  }
+}
 
 /* ===========================
    SCROLLBAR

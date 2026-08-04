@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '../../types';
 import { ArrowRight, Sparkles, ShieldCheck, RotateCw, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface HeroSliderProps {
   products: Product[];
@@ -69,6 +74,24 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products, onSelectProduc
   const currentProduct = heroItems[currentIndex] || products[0];
   if (!currentProduct) return null;
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const heroImgRef = useRef<HTMLImageElement>(null);
+
+  // GSAP — Parallax on the product image as user scrolls
+  useGSAP(() => {
+    if (!heroImgRef.current) return;
+    gsap.to(heroImgRef.current, {
+      yPercent: -12,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.2,
+      },
+    });
+  }, { scope: sectionRef, dependencies: [currentProduct.id] });
+
   const slideVariants = {
     enter: (dir: 'next' | 'prev') => ({
       x: dir === 'next' ? 40 : -40,
@@ -82,7 +105,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products, onSelectProduc
   };
 
   return (
-    <section className="relative w-full overflow-hidden py-6 sm:py-10 px-4 sm:px-8">
+    <section ref={sectionRef} className="relative w-full overflow-hidden py-6 sm:py-10 px-4 sm:px-8">
       {/* Ambient background blob — color shifts with product */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -241,6 +264,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products, onSelectProduc
                   {/* Main image */}
                   <div className="aspect-square rounded-3xl overflow-hidden glass-panel p-4 border border-white/30 dark:border-white/10 shadow-2xl">
                     <img
+                      ref={heroImgRef}
                       src={currentProduct.images[0]}
                       alt={currentProduct.title}
                       className="w-full h-full object-cover rounded-2xl"

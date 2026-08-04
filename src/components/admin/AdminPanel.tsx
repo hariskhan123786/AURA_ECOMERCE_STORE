@@ -284,9 +284,50 @@ export const AdminPanel: React.FC<{ products: Product[]; onRefreshProducts: () =
                   <h5 className="font-bold text-sm text-[#FF6B35]">{c.code}</h5>
                   <p className="text-xs text-slate-500 dark:text-slate-400">{c.discountValue}% OFF</p>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full">Active</span>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${c.isActive ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-500/10'}`}>
+                  {c.isActive ? 'Active' : 'Inactive'}
+                </span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* SQL & DATABASE TAB */}
+      {activeTab === 'sql' && (
+        <div className="space-y-6">
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                  <Database className="w-5 h-5 text-[#FF6B35]" /> Production Supabase Database Setup
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Run the complete SQL DDL below in your Supabase SQL Editor to set up tables, RLS policies, triggers, and full-text search.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`-- SQL Schema is located in src/lib/schema.sql`);
+                  showToast('SQL Copied to Clipboard!', 'Paste into Supabase SQL Editor', 'success');
+                }}
+                className="px-4 py-2 rounded-xl bg-[#FF6B35] text-white text-xs font-bold flex items-center gap-2 shadow-md"
+              >
+                <Code2 className="w-4 h-4" /> Copy SQL DDL
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 text-slate-300 font-mono text-xs max-h-96 overflow-y-auto border border-slate-800 space-y-2">
+              <p className="text-amber-400 font-bold">-- AURA LUXE SUPABASE PRODUCTION SCHEMA</p>
+              <p className="text-slate-500">-- Tables: user_profiles, categories, brands, products, coupons, addresses, orders, wishlist, reviews, notifications, activity_logs, recently_viewed, flash_sales</p>
+              <p className="text-slate-500">-- Features: Row Level Security (RLS), Full Text Search vectors, Triggers, Views, Foreign keys, Indexes</p>
+              <pre className="text-emerald-400 font-mono text-[11px] whitespace-pre-wrap">
+{`1. Copy contents of src/lib/schema.sql
+2. Go to Supabase Dashboard > SQL Editor
+3. Paste and click Run
+4. All tables, RLS policies, and triggers will be created instantly.`}
+              </pre>
+            </div>
           </div>
         </div>
       )}
