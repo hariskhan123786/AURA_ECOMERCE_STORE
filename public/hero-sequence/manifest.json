@@ -7,7 +7,7 @@
                     "totalFrames":  192,
                     "height":  720
                 },
-    "generatedAt":  "2026-08-04T09:43:09.0137104-07:00",
+    "generatedAt":  "2026-08-04T11:30:15.1946900-07:00",
     "version":  1,
     "video":  {
                   "duration":  8,
@@ -15,10 +15,10 @@
               },
     "mobile":  {
                    "pattern":  "mobile/frame%04d.jpg",
-                   "width":  960,
+                   "width":  720,
                    "ext":  "jpg",
-                   "fps":  12,
-                   "totalFrames":  96,
-                   "height":  540
+                   "fps":  24,
+                   "totalFrames":  192,
+                   "height":  1280
                }
 }

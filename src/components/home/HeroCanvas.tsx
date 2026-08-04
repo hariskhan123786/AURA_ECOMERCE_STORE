@@ -366,18 +366,11 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
             background: 'linear-gradient(135deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.38) 100%)',
           }}
         >
-          <div style={{
-            maxWidth: 1300, width: '100%',
-            display: 'grid',
-            gridTemplateColumns: window.innerWidth < 900 ? '1fr' : '1fr auto',
-            gap: 'clamp(32px, 6vw, 90px)',
-            alignItems: 'center',
-          }}>
-
+          <div className="hc-grid-container">
             {/* ── LEFT: Hero copy ──────────────────────────────── */}
-            <div style={{ pointerEvents: 'all' }}>
+            <div className="hc-copy-wrapper" style={{ pointerEvents: 'all' }}>
               {/* Badges */}
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 26 }}>
+              <div className="hc-badge-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 26 }}>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '5px 14px', borderRadius: 100,
@@ -401,11 +394,11 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
               </div>
 
               {/* Headline */}
-              <h1 style={{
+              <h1 className="hc-headline" style={{
                 margin: '0 0 18px',
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
                 fontWeight: 300, lineHeight: 1.05,
-                fontSize: 'clamp(40px, 5.8vw, 78px)',
+                fontSize: 'clamp(32px, 5.8vw, 78px)',
                 color: '#fff', letterSpacing: '-0.01em',
               }}>
                 <span style={{ fontStyle: 'italic', display: 'block' }}>{copy.line1}</span>
@@ -413,7 +406,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
                   display: 'inline-block',
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
                   fontWeight: 800,
-                  fontSize: 'clamp(26px, 4.2vw, 56px)',
+                  fontSize: 'clamp(24px, 4.2vw, 56px)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                   background: 'linear-gradient(135deg, #FF6B35 0%, #FFA270 55%, #FFD29E 100%)',
@@ -427,7 +420,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
               </h1>
 
               {/* Subtitle */}
-              <p style={{
+              <p className="hc-subtitle" style={{
                 margin: '0 0 36px',
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontSize: 'clamp(13px, 1.1vw, 15px)',
@@ -438,7 +431,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
               </p>
 
               {/* CTAs */}
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div className="hc-cta-row" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => activeProduct && onSelectProduct(activeProduct)}
                   style={{
@@ -491,7 +484,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
 
               {/* Progress dots */}
               {totalShowcase > 1 && (
-                <div style={{ display: 'flex', gap: 7, marginTop: 34, alignItems: 'center' }}>
+                <div className="hc-dots-row" style={{ display: 'flex', gap: 7, marginTop: 34, alignItems: 'center' }}>
                   {Array.from({ length: totalShowcase }).map((_, i) => (
                     <div key={i} style={{
                       height: 5, borderRadius: 3,
@@ -513,11 +506,12 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
             </div>
 
             {/* ── RIGHT: Product card ──────────────────────────── */}
-            {activeProduct && window.innerWidth >= 900 && (
+            {activeProduct && (
               <div
                 onClick={() => onSelectProduct(activeProduct)}
+                className="hc-responsive-card"
                 style={{
-                  width: 285, cursor: 'pointer', flexShrink: 0,
+                  cursor: 'pointer', flexShrink: 0,
                   borderRadius: 26, overflow: 'hidden',
                   background: 'rgba(10,10,16,0.82)',
                   backdropFilter: 'blur(40px)',
@@ -630,6 +624,77 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
         @keyframes hc-fade-in {
           from { opacity: 0; transform: scale(1.03); }
           to   { opacity: 1; transform: scale(1); }
+        }
+        .hc-grid-container {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          align-items: center;
+          width: 100%;
+          max-width: 1300px;
+        }
+        .hc-responsive-card {
+          width: 280px;
+          margin: 0 auto;
+        }
+        .hc-copy-wrapper {
+          text-align: left;
+        }
+        @media (min-width: 900px) {
+          .hc-grid-container {
+            grid-template-columns: 1fr auto;
+            gap: clamp(32px, 6vw, 90px);
+          }
+          .hc-responsive-card {
+            width: 285px;
+          }
+        }
+        @media (max-width: 900px) {
+          .hc-copy-wrapper {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .hc-badge-row {
+            justify-content: center;
+            margin-bottom: 16px !important;
+          }
+          .hc-headline {
+            margin-bottom: 12px !important;
+            line-height: 1.15 !important;
+          }
+          .hc-headline span:first-child {
+            font-size: clamp(24px, 6vw, 42px) !important;
+          }
+          .hc-headline span:last-child {
+            font-size: clamp(18px, 4.5vw, 32px) !important;
+          }
+          .hc-subtitle {
+            margin-bottom: 24px !important;
+            text-align: center;
+            max-width: 400px;
+            font-size: 13px !important;
+          }
+          .hc-cta-row {
+            justify-content: center;
+            gap: 8px !important;
+          }
+          .hc-cta-row button {
+            padding: 10px 20px !important;
+            font-size: 11px !important;
+          }
+          .hc-dots-row {
+            justify-content: center;
+            margin-top: 20px !important;
+          }
+          .hc-responsive-card {
+            width: 240px;
+            margin-top: 10px;
+          }
+          .hc-responsive-card img {
+            height: 100%;
+          }
         }
       `}</style>
     </>

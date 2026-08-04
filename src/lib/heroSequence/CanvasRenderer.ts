@@ -78,17 +78,17 @@ export class CanvasRenderer {
     let dw: number, dh: number, dx: number, dy: number;
 
     if (canvasAspect > this.sourceAspect) {
-      // Canvas is wider — letterbox top/bottom
-      dw = canvasW;
-      dh = canvasW / this.sourceAspect;
-      dx = 0;
-      dy = (canvasH - dh) / 2;
-    } else {
-      // Canvas is taller — pillarbox left/right
+      // Canvas is wider than video aspect — fit height (pillarbox left/right)
       dh = canvasH;
       dw = canvasH * this.sourceAspect;
       dx = (canvasW - dw) / 2;
       dy = 0;
+    } else {
+      // Canvas is taller than video aspect — fit width (letterbox top/bottom)
+      dw = canvasW;
+      dh = canvasW / this.sourceAspect;
+      dx = 0;
+      dy = (canvasH - dh) / 2;
     }
 
     return { sx: 0, sy: 0, sw: 0, sh: 0, dx, dy, dw, dh };

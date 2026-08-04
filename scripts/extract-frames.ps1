@@ -19,15 +19,24 @@ if ($VideoFiles) {
 $OutDir        = Join-Path $Root "public\hero-sequence"
 $DesktopDir    = Join-Path $OutDir "desktop"
 $MobileDir     = Join-Path $OutDir "mobile"
+$MobileSeqDir  = Join-Path $OutDir "MOBILE_SEQUENCE"
 $FfmpegDir     = Join-Path $Root "scripts\.ffmpeg"
 $FfmpegExe     = Join-Path $FfmpegDir "ffmpeg.exe"
 $FfprobeExe    = Join-Path $FfmpegDir "ffprobe.exe"
+
+# Try to find specific mobile video in the MOBILE_SEQUENCE folder
+$MobileVideoPath = $VideoPath
+$MobileVideoFiles = Get-ChildItem -Path $MobileSeqDir -Filter "*.mp4" | Select-Object -First 1
+if ($MobileVideoFiles) {
+    $MobileVideoPath = $MobileVideoFiles.FullName
+}
 
 Write-Host ""
 Write-Host "  Aura Luxe - Hero Frame Extraction" -ForegroundColor Cyan
 Write-Host "  ─────────────────────────────────" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  Detected Video: $VideoPath" -ForegroundColor Green
+Write-Host "  Desktop Video: $VideoPath" -ForegroundColor Green
+Write-Host "  Mobile Video:  $MobileVideoPath" -ForegroundColor Green
 
 # ─── CHECK / DOWNLOAD FFMPEG ──────────────────────────────────────
 if (-not (Test-Path $FfmpegExe)) {
@@ -85,41 +94,52 @@ if (Test-Path $MobileDir) {
 
 # ─── PROBE VIDEO ──────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  Probing video..." -ForegroundColor Yellow
+Write-Host "  Probing videos..." -ForegroundColor Yellow
 
-$ProbeJson = & $FfprobeExe -v quiet -print_format json -show_streams -show_format $VideoPath 2>&1
-$Probe     = $ProbeJson | ConvertFrom-Json
+# Probe Desktop Video
+$DesktopProbeJson = & $FfprobeExe -v quiet -print_format json -show_streams -show_format $VideoPath 2>&1
+$DesktopProbe     = $DesktopProbeJson | ConvertFrom-Json
+$DesktopVideoStream = $DesktopProbe.streams | Where-Object { $_.codec_type -eq "video" } | Select-Object -First 1
+$DesktopRawDuration = if ($DesktopVideoStream.duration) { $DesktopVideoStream.duration } elseif ($DesktopProbe.format.duration) { $DesktopProbe.format.duration } else { "10" }
+$DesktopDuration    = [double]$DesktopRawDuration
+$DesktopWidth       = [int]$DesktopVideoStream.width
+$DesktopHeight      = [int]$DesktopVideoStream.height
 
-$VideoStream = $Probe.streams | Where-Object { $_.codec_type -eq "video" } | Select-Object -First 1
-$RawDuration = if ($VideoStream.duration) { $VideoStream.duration } elseif ($Probe.format.duration) { $Probe.format.duration } else { "10" }
-$Duration    = [double]$RawDuration
-$Width       = [int]$VideoStream.width
-$Height      = [int]$VideoStream.height
+# Probe Mobile Video
+$MobileProbeJson = & $FfprobeExe -v quiet -print_format json -show_streams -show_format $MobileVideoPath 2>&1
+$MobileProbe     = $MobileProbeJson | ConvertFrom-Json
+$MobileVideoStream = $MobileProbe.streams | Where-Object { $_.codec_type -eq "video" } | Select-Object -First 1
+$MobileRawDuration = if ($MobileVideoStream.duration) { $MobileVideoStream.duration } elseif ($MobileProbe.format.duration) { $MobileProbe.format.duration } else { "10" }
+$MobileDuration    = [double]$MobileRawDuration
+$MobileWidth       = [int]$MobileVideoStream.width
+$MobileHeight      = [int]$MobileVideoStream.height
 
-Write-Host "  Duration: $([Math]::Round($Duration, 2))s  |  Resolution: ${Width}x${Height}" -ForegroundColor Green
+Write-Host "  Desktop - Duration: $([Math]::Round($DesktopDuration, 2))s  |  Resolution: ${DesktopWidth}x${DesktopHeight}" -ForegroundColor Green
+Write-Host "  Mobile  - Duration: $([Math]::Round($MobileDuration, 2))s  |  Resolution: ${MobileWidth}x${MobileHeight}" -ForegroundColor Green
 
 $DesktopFPS  = 24
-$MobileFPS   = 12
+$MobileFPS   = 24
 $MaxWidth    = 1920
-$MobileMaxW  = 960
+$MobileMaxW  = 1080
 $DesktopQ    = 2  # JPEG quality scale: 2-31 (2 is high quality)
-$MobileQ     = 4  # JPEG quality scale: 4 is medium-high quality
+$MobileQ     = 2  # Matches desktop quality (highest)
 
-$EstDesktop = [Math]::Ceiling($Duration * $DesktopFPS)
-$EstMobile  = [Math]::Ceiling($Duration * $MobileFPS)
+$EstDesktop = [Math]::Ceiling($DesktopDuration * $DesktopFPS)
+$EstMobile  = [Math]::Ceiling($MobileDuration * $MobileFPS)
 Write-Host "  Est. desktop frames: $EstDesktop  |  mobile frames: $EstMobile" -ForegroundColor Cyan
 
 # ─── EXTRACT DESKTOP & MOBILE FRAMES VIA BAT FILE (robust escaping) 
 Write-Host ""
 Write-Host "  Extracting frames via cmd execution..." -ForegroundColor Yellow
 
-$Scale = if ($Width -gt $MaxWidth) { "scale=${MaxWidth}:-2" } else { "scale=${Width}:-2" }
+$DesktopScale = if ($DesktopWidth -gt $MaxWidth) { "scale=${MaxWidth}:-2" } else { "scale=${DesktopWidth}:-2" }
+$MobileScale  = if ($MobileWidth -gt $MobileMaxW) { "scale=${MobileMaxW}:-2" } else { "scale=${MobileWidth}:-2" }
 
 # Write a temporary .bat file to avoid PowerShell argument parser breaking %04d
 $batContent = "@echo off`r`n" +
-  "`"$FfmpegExe`" -i `"$VideoPath`" -vf `"${Scale},fps=${DesktopFPS}`" -q:v $DesktopQ `"$DesktopDir\frame%%04d.jpg`" -y 2>nul`r`n" +
+  "`"$FfmpegExe`" -i `"$VideoPath`" -vf `"${DesktopScale},fps=${DesktopFPS}`" -q:v $DesktopQ `"$DesktopDir\frame%%04d.jpg`" -y 2>nul`r`n" +
   "echo DESKTOP_DONE`r`n" +
-  "`"$FfmpegExe`" -i `"$VideoPath`" -vf `"scale=${MobileMaxW}:-2,fps=${MobileFPS}`" -q:v $MobileQ `"$MobileDir\frame%%04d.jpg`" -y 2>nul`r`n" +
+  "`"$FfmpegExe`" -i `"$MobileVideoPath`" -vf `"${MobileScale},fps=${MobileFPS}`" -q:v $MobileQ `"$MobileDir\frame%%04d.jpg`" -y 2>nul`r`n" +
   "echo MOBILE_DONE`r`n"
 
 $batPath = Join-Path $PSScriptRoot ".temp_extract.bat"
@@ -144,21 +164,21 @@ $Manifest = @{
     generatedAt = (Get-Date -Format "o")
     video       = @{
         source   = (Split-Path $VideoPath -Leaf)
-        duration = [Math]::Round($Duration, 2)
+        duration = [Math]::Round($DesktopDuration, 2)
     }
     desktop     = @{
         totalFrames = $DesktopCount
         fps         = $DesktopFPS
-        width       = if ($Width -gt $MaxWidth) { $MaxWidth } else { $Width }
-        height      = $Height
+        width       = if ($DesktopWidth -gt $MaxWidth) { $MaxWidth } else { $DesktopWidth }
+        height      = if ($DesktopWidth -gt $MaxWidth) { [int]($DesktopHeight * ($MaxWidth / $DesktopWidth)) } else { $DesktopHeight }
         pattern     = "desktop/frame%04d.jpg"
         ext         = "jpg"
     }
     mobile      = @{
         totalFrames = $MobileCount
         fps         = $MobileFPS
-        width       = $MobileMaxW
-        height      = [int]($Height * ($MobileMaxW / $Width))
+        width       = if ($MobileWidth -gt $MobileMaxW) { $MobileMaxW } else { $MobileWidth }
+        height      = if ($MobileWidth -gt $MobileMaxW) { [int]($MobileHeight * ($MobileMaxW / $MobileWidth)) } else { $MobileHeight }
         pattern     = "mobile/frame%04d.jpg"
         ext         = "jpg"
     }

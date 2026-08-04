@@ -23,8 +23,13 @@ export interface FrameSequenceState {
 
 // ─── HELPER ───────────────────────────────────────────────────────
 function isMobile(): boolean {
-  return window.innerWidth < 768 ||
-    ('ontouchstart' in window && window.innerWidth < 1024);
+  // Check user agent for real mobile devices (phones/tablets)
+  const uaCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+  // Also check width — covers browser DevTools mobile emulation
+  const widthCheck = window.innerWidth < 768;
+  return uaCheck || widthCheck;
 }
 
 // ─── HOOK ─────────────────────────────────────────────────────────
@@ -38,10 +43,19 @@ export function useFrameSequence(): FrameSequenceState {
   const loaderRef    = useRef<FrameLoader | null>(null);
   const preloaderRef = useRef<SequencePreloader | null>(null);
   const frameReqRef  = useRef<number | null>(null);
+  // Track which variant is loaded so we can reinit if it changes
+  const variantRef   = useRef<'mobile' | 'desktop'>(isMobile() ? 'mobile' : 'desktop');
 
-  // ─── INIT ─────────────────────────────────────────────────────
-  useEffect(() => {
-    const variant = isMobile() ? 'mobile' : 'desktop';
+  // ─── INIT / REINIT ────────────────────────────────────────────
+  const initLoader = (variant: 'mobile' | 'desktop') => {
+    // Tear down existing
+    preloaderRef.current?.destroy();
+    if (frameReqRef.current !== null) cancelAnimationFrame(frameReqRef.current);
+
+    setIsReady(false);
+    setLoadProgress(0);
+    setManifest(null);
+
     const loader  = new FrameLoader(variant);
     const preloader = new SequencePreloader(loader);
 
@@ -63,13 +77,30 @@ export function useFrameSequence(): FrameSequenceState {
     }).catch(err => {
       console.error('[useFrameSequence] init error', err);
     });
+  };
 
-    return () => {
-      preloader.destroy();
-      if (frameReqRef.current !== null) {
-        cancelAnimationFrame(frameReqRef.current);
+  useEffect(() => {
+    initLoader(variantRef.current);
+
+    // Re-init if variant flips on resize / orientation change
+    const onResize = () => {
+      const newVariant: 'mobile' | 'desktop' = isMobile() ? 'mobile' : 'desktop';
+      if (newVariant !== variantRef.current) {
+        variantRef.current = newVariant;
+        initLoader(newVariant);
       }
     };
+
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', onResize, { passive: true });
+
+    return () => {
+      preloaderRef.current?.destroy();
+      if (frameReqRef.current !== null) cancelAnimationFrame(frameReqRef.current);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── SET FRAME ────────────────────────────────────────────────
