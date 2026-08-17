@@ -1,24 +1,24 @@
-﻿{
-    "desktop":  {
-                    "pattern":  "desktop/frame%04d.jpg",
-                    "width":  1280,
-                    "ext":  "jpg",
-                    "fps":  24,
-                    "totalFrames":  192,
-                    "height":  720
-                },
-    "generatedAt":  "2026-08-04T11:30:15.1946900-07:00",
-    "version":  1,
-    "video":  {
-                  "duration":  8,
-                  "source":  "AURALAXURE_luxury_brand_intro_202608040931.mp4"
-              },
-    "mobile":  {
-                   "pattern":  "mobile/frame%04d.jpg",
-                   "width":  720,
-                   "ext":  "jpg",
-                   "fps":  24,
-                   "totalFrames":  192,
-                   "height":  1280
-               }
+{
+  "desktop": {
+    "pattern": "desktop/frame%04d.jpg",
+    "width": 1280,
+    "height": 720,
+    "ext": "jpg",
+    "fps": 24,
+    "totalFrames": 192
+  },
+  "mobile": {
+    "pattern": "mobile/frame%04d.jpg",
+    "width": 720,
+    "height": 1280,
+    "ext": "jpg",
+    "fps": 24,
+    "totalFrames": 192
+  },
+  "version": 1,
+  "video": {
+    "duration": 8,
+    "source": "AURALAXURE_luxury_brand_intro_202608040931.mp4"
+  },
+  "generatedAt": "2026-08-04T11:30:15.1946900-07:00"
 }

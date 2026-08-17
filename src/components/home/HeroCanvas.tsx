@@ -150,7 +150,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
   const [imageIdx, setImageIdx]         = useState(0);
 
   // ── Frame sequence hook
-  const { loadProgress, isReady, bitmap, totalFrames, setFrame } = useFrameSequence();
+  const { loadProgress, isReady, frameSource, totalFrames, setFrame, loader } = useFrameSequence();
 
   // ── Active product
   const totalShowcase = Math.min(3, products.length);
@@ -168,10 +168,7 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
   useEffect(() => {
     if (!canvasRef.current) return;
     try {
-      const r = new CanvasRenderer(canvasRef.current, {
-        motionBlur: true,
-        motionBlurAlpha: 0.1,
-      });
+      const r = new CanvasRenderer(canvasRef.current);
       rendererRef.current = r;
       return () => { r.destroy(); rendererRef.current = null; };
     } catch (e) {
@@ -179,12 +176,12 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
     }
   }, []);
 
-  // ── Draw frame whenever bitmap updates
+  // ── Draw frame whenever frameSource updates
   useEffect(() => {
-    if (bitmap && rendererRef.current) {
-      rendererRef.current.draw(bitmap);
+    if (frameSource && rendererRef.current) {
+      rendererRef.current.draw(frameSource);
     }
-  }, [bitmap]);
+  }, [frameSource]);
 
   // ── Three.js particles
   useEffect(() => {
@@ -235,6 +232,11 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
     scrollDistance: SCROLL_DISTANCE,
     onFrame: (idx) => {
       setFrame(idx);
+      if (loader && rendererRef.current) {
+        loader.loadFrame(idx).then(source => {
+          rendererRef.current?.draw(source);
+        }).catch(() => {});
+      }
 
       // Calculate threshold based on frame0183
       const startFrame = Math.round(totalFrames * (183 / 192));

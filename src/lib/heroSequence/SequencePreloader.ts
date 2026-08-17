@@ -1,23 +1,16 @@
 /**
  * SequencePreloader.ts
  *
- * Progressively preloads frames in a sliding window around the
- * current playback position. Uses requestIdleCallback for
- * background loading so it never blocks the main thread.
+ * Preloads frames progressively in background batches.
  */
 
 import { FrameLoader } from './FrameLoader';
 
-// ─── CONFIGURATION ────────────────────────────────────────────────
-const INITIAL_BURST   = 24;   // frames to eagerly load on init
-const WINDOW_AHEAD    = 15;   // frames to preload ahead of current
-const WINDOW_BEHIND   = 8;    // frames to keep behind current
-const IDLE_CHUNK      = 6;    // frames per idle callback batch
+const INITIAL_BURST = 24; // Initial frames for fast startup
+const IDLE_CHUNK = 8;     // Frames to preload per idle step
 
-// ─── TYPES ────────────────────────────────────────────────────────
 export type ProgressCallback = (loaded: number, total: number) => void;
 
-// ─── PRELOADER CLASS ──────────────────────────────────────────────
 export class SequencePreloader {
   private loader: FrameLoader;
   private totalFrames: number = 0;
@@ -26,13 +19,11 @@ export class SequencePreloader {
   private idleHandle: number | null = null;
   private currentIndex: number = 0;
   private initialBurstDone: boolean = false;
-  private initialBurstPromise: Promise<void> | null = null;
 
   constructor(loader: FrameLoader) {
     this.loader = loader;
   }
 
-  // ─── INIT ────────────────────────────────────────────────────
   async init(onProgress?: ProgressCallback): Promise<void> {
     if (onProgress) this.onProgress = onProgress;
 
@@ -40,21 +31,17 @@ export class SequencePreloader {
     this.totalFrames = this.loader.totalFrames;
 
     if (this.totalFrames === 0) {
-      console.warn('[SequencePreloader] No frames found in manifest');
-      return;
+      this.totalFrames = 192;
     }
 
-    // Eagerly load the initial burst (first N frames)
-    this.initialBurstPromise = this._loadInitialBurst();
-    await this.initialBurstPromise;
-
+    // Load initial burst
+    await this._loadInitialBurst();
     this.initialBurstDone = true;
 
-    // Start idle background loading
+    // Start background preloader
     this._scheduleIdleLoad();
   }
 
-  // ─── INITIAL BURST ────────────────────────────────────────────
   private async _loadInitialBurst(): Promise<void> {
     const burst = Math.min(INITIAL_BURST, this.totalFrames);
     const tasks: Promise<void>[] = [];
@@ -63,76 +50,58 @@ export class SequencePreloader {
       tasks.push(
         this.loader.loadFrame(i).then(() => {
           this.loadedCount++;
-          this.onProgress?.(this.loadedCount, this.totalFrames);
-        }).catch(() => {})
+          this.onProgress?.(this.loadedCount, burst);
+        }).catch(() => {
+          this.loadedCount++;
+          this.onProgress?.(this.loadedCount, burst);
+        })
       );
     }
     await Promise.all(tasks);
   }
 
-  // ─── IDLE BACKGROUND LOADER ───────────────────────────────────
   private _scheduleIdleLoad() {
     if (this.idleHandle !== null) return;
 
-    const scheduleNext = () => {
-      if (typeof requestIdleCallback !== 'undefined') {
-        this.idleHandle = requestIdleCallback(
-          (deadline) => {
-            this.idleHandle = null;
-            this._processIdleChunk(deadline.timeRemaining());
-            if (this.loadedCount < this.totalFrames) {
-              scheduleNext();
-            }
-          },
-          { timeout: 2000 }
-        );
-      } else {
-        // Fallback: setTimeout
-        this.idleHandle = window.setTimeout(() => {
-          this.idleHandle = null;
-          this._processIdleChunk(16);
-          if (this.loadedCount < this.totalFrames) {
-            scheduleNext();
-          }
-        }, 100) as unknown as number;
+    const runChunk = () => {
+      let loadedInBatch = 0;
+
+      // Preload ahead and behind cursor
+      for (let offset = 1; offset < this.totalFrames; offset++) {
+        const ahead = this.currentIndex + offset;
+        const behind = this.currentIndex - offset;
+
+        if (ahead < this.totalFrames) {
+          this.loader.prefetch(ahead);
+          loadedInBatch++;
+          if (loadedInBatch >= IDLE_CHUNK) break;
+        }
+        if (behind >= 0) {
+          this.loader.prefetch(behind);
+          loadedInBatch++;
+          if (loadedInBatch >= IDLE_CHUNK) break;
+        }
+      }
+
+      if (this.idleHandle !== null) {
+        this.idleHandle = window.setTimeout(runChunk, 150) as unknown as number;
       }
     };
 
-    scheduleNext();
+    this.idleHandle = window.setTimeout(runChunk, 100) as unknown as number;
   }
 
-  private _processIdleChunk(timeRemaining: number) {
-    // Fill from current window outward, then fill rest sequentially
-    const start = Math.max(0, this.currentIndex - WINDOW_BEHIND);
-    const end   = Math.min(this.totalFrames - 1, this.currentIndex + WINDOW_AHEAD);
-
-    let loaded = 0;
-    for (let i = start; i <= end && loaded < IDLE_CHUNK && timeRemaining > 2; i++) {
-      this.loader.prefetch(i);
-      loaded++;
-    }
-  }
-
-  // ─── CURSOR UPDATE ────────────────────────────────────────────
-  /** Call this when the current frame index changes (from scroll) */
   updateCursor(index: number) {
     this.currentIndex = index;
-
-    if (!this.initialBurstDone) return;
-
-    // Immediate sync preload for the next few frames
-    const urgentAhead = 5;
-    for (let i = index; i <= Math.min(this.totalFrames - 1, index + urgentAhead); i++) {
+    // Immediately prefetch nearby frames
+    for (let i = index; i <= Math.min(this.totalFrames - 1, index + 10); i++) {
       this.loader.prefetch(i);
     }
-
-    // Evict frames outside the memory window
-    const evictStart = Math.max(0, index - WINDOW_BEHIND - 5);
-    const evictEnd   = Math.min(this.totalFrames - 1, index + WINDOW_AHEAD + 5);
-    this.loader.evictOutside(evictStart, evictEnd);
+    for (let i = Math.max(0, index - 5); i < index; i++) {
+      this.loader.prefetch(i);
+    }
   }
 
-  // ─── PUBLIC GETTERS ───────────────────────────────────────────
   get progress(): number {
     if (this.totalFrames === 0) return 0;
     return this.loadedCount / this.totalFrames;
@@ -142,14 +111,9 @@ export class SequencePreloader {
     return this.initialBurstDone;
   }
 
-  // ─── CLEANUP ─────────────────────────────────────────────────
   destroy() {
     if (this.idleHandle !== null) {
-      if (typeof cancelIdleCallback !== 'undefined') {
-        cancelIdleCallback(this.idleHandle);
-      } else {
-        clearTimeout(this.idleHandle);
-      }
+      clearTimeout(this.idleHandle);
       this.idleHandle = null;
     }
     this.loader.destroy();
