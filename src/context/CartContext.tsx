@@ -27,8 +27,8 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const FREE_SHIPPING_THRESHOLD = Number(import.meta.env.VITE_FREE_SHIPPING_THRESHOLD || 200);
-const TAX_RATE = Number(import.meta.env.VITE_TAX_RATE || 0.08);
+const FREE_SHIPPING_THRESHOLD = Number(import.meta.env.VITE_FREE_SHIPPING_THRESHOLD || 75000);
+const TAX_RATE = Number(import.meta.env.VITE_TAX_RATE || 0.05);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -143,7 +143,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [appliedCoupon, subtotal]);
 
   const shippingFee = useMemo(
-    () => (subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : 25),
+    () => (subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : 1500),
     [subtotal]
   );
 

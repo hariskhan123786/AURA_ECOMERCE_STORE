@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../../context/CartContext';
+import { formatPKR } from '../../lib/currency';
 import { X, Trash2, ShoppingBag, ArrowRight, Truck, Tag, Check } from 'lucide-react';
 
 interface CartDrawerProps {
@@ -21,6 +22,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
     appliedCoupon,
     applyCoupon,
     removeCoupon,
+    freeShippingThreshold,
     amountNeededForFreeShipping,
   } = useCart();
 
@@ -66,7 +68,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
             </div>
             <button
               onClick={closeCart}
-              className="p-1.5 rounded-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 hover:text-[#FF6B35]"
+              aria-label="Close cart"
+              className="p-1.5 rounded-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 hover:text-[#FF6B35] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -77,18 +80,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
             {amountNeededForFreeShipping > 0 ? (
               <div className="space-y-1.5">
                 <p className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-[#FF6B35]" /> Add <span className="text-[#FF6B35]">${amountNeededForFreeShipping.toFixed(2)}</span> more for Free Express Shipping!
+                  <Truck className="w-4 h-4 text-[#FF6B35]" /> Add <span className="text-[#FF6B35]">{formatPKR(amountNeededForFreeShipping)}</span> more for Free Express Delivery!
                 </p>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full bg-[#FF6B35] rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, ((200 - amountNeededForFreeShipping) / 200) * 100)}%` }}
+                    style={{ width: `${Math.min(100, ((freeShippingThreshold - amountNeededForFreeShipping) / freeShippingThreshold) * 100)}%` }}
                   />
                 </div>
               </div>
             ) : (
               <p className="font-bold text-emerald-500 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> You've Unlocked Free Worldwide Express Shipping!
+                <Check className="w-4 h-4" /> You've Unlocked Free Nationwide Express Shipping!
               </p>
             )}
           </div>
@@ -115,10 +118,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
                       Color: {item.selectedColor} • Size: {item.selectedSize}
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-extrabold text-sm text-[#FF6B35]">${item.price.toFixed(2)}</span>
+                      <span className="font-extrabold text-sm text-[#FF6B35]">{formatPKR(item.price)}</span>
                       <div className="flex items-center rounded-xl glass-pill border border-slate-200 dark:border-slate-800 px-2 py-0.5">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          aria-label="Decrease quantity"
                           className="text-xs font-bold px-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         >
                           -
@@ -126,6 +130,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
                         <span className="text-xs font-bold px-2">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          aria-label="Increase quantity"
                           className="text-xs font-bold px-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-white"
                         >
                           +
@@ -135,7 +140,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="text-slate-400 hover:text-rose-500 p-1 self-start"
+                    aria-label="Remove item"
+                    className="text-slate-400 hover:text-rose-500 p-1 self-start transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -156,13 +162,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
                   onChange={(e) => setCouponInput(e.target.value)}
                   className="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#FF6B35]"
                 />
-                <button type="submit" className="px-3 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold text-xs">
+                <button type="submit" className="px-3 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold text-xs hover:bg-[#FF6B35] transition-colors">
                   Apply
                 </button>
               </form>
 
               {appliedCoupon && (
-                <div className="flex items-center justify-between text-xs text-emerald-500 bg-emerald-500/10 p-2 rounded-xl">
+                <div className="flex items-center justify-between text-xs text-emerald-500 bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">
                   <span>Code <b>{appliedCoupon.code}</b> Applied</span>
                   <button onClick={removeCoupon} className="text-rose-500 font-bold text-[10px] underline">
                     Remove
@@ -170,24 +176,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onProceedToCheckout }) =
                 </div>
               )}
 
+              {couponMsg && (
+                <p className={`text-[11px] font-semibold ${couponMsg.success ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {couponMsg.text}
+                </p>
+              )}
+
               <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400 pt-1">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-bold text-slate-900 dark:text-white">${subtotal.toFixed(2)}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{formatPKR(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-500">
+                  <div className="flex justify-between text-emerald-500 font-semibold">
                     <span>Discount</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-{formatPKR(discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Estimated Shipping</span>
-                  <span>{shippingFee === 0 ? <span className="text-emerald-500 font-bold">FREE</span> : `$${shippingFee.toFixed(2)}`}</span>
+                  <span>Estimated Shipping (Pakistan)</span>
+                  <span>{shippingFee === 0 ? <span className="text-emerald-500 font-bold">FREE</span> : formatPKR(shippingFee)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex justify-between text-base font-black text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
                   <span>Total</span>
-                  <span className="text-[#FF6B35]">${totalAmount.toFixed(2)}</span>
+                  <span className="text-[#FF6B35] font-extrabold">{formatPKR(totalAmount)}</span>
                 </div>
               </div>
 

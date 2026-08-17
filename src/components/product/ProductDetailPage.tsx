@@ -3,6 +3,7 @@ import { Product, Review } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useNotification } from '../../context/NotificationContext';
+import { formatPKR } from '../../lib/currency';
 import { dbService } from '../../lib/supabase';
 import {
   Star,
@@ -132,9 +133,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
           {/* PRICE */}
           <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-black text-slate-900 dark:text-white">${product.price.toFixed(2)}</span>
+            <span className="text-4xl font-black text-slate-900 dark:text-white">{formatPKR(product.price)}</span>
             {product.compareAtPrice && (
-              <span className="text-base text-slate-400 line-through">${product.compareAtPrice.toFixed(2)}</span>
+              <span className="text-base text-slate-400 line-through">{formatPKR(product.compareAtPrice)}</span>
             )}
           </div>
 

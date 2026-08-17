@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useNotification } from '../../context/NotificationContext';
+import { formatPKR } from '../../lib/currency';
 import { X, Star, ShoppingBag, ShieldCheck, Truck, RotateCw, Check } from 'lucide-react';
 
 interface QuickViewModalProps {
@@ -148,11 +149,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               {/* PRICE */}
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-slate-900 dark:text-white">
-                  ${product.price.toFixed(2)}
+                  {formatPKR(product.price)}
                 </span>
                 {product.compareAtPrice && product.compareAtPrice > product.price && (
                   <span className="text-base text-slate-400 line-through">
-                    ${product.compareAtPrice.toFixed(2)}
+                    {formatPKR(product.compareAtPrice)}
                   </span>
                 )}
               </div>
@@ -241,7 +242,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               {/* SHIPPING TRUST BADGES */}
               <div className="grid grid-cols-2 gap-3 pt-2 text-xs text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-[#FF6B35]" /> Express Global Shipping
+                  <Truck className="w-4 h-4 text-[#FF6B35]" /> Nationwide Delivery (PK)
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" /> 2-Year Aura Warranty

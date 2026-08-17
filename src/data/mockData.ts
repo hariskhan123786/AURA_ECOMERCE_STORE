@@ -62,8 +62,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'AURA Horizon ANC Spatial Headphones',
     slug: 'aura-horizon-anc-headphones',
     description: 'Engineered with custom titanium dynamic drivers, lossless spatial audio with head-tracking, and ultra-plush memory foam acoustic earcups wrapped in supple Nappa leather.',
-    price: 349.99,
-    compareAtPrice: 429.99,
+    price: 98500,
+    compareAtPrice: 120000,
     categoryId: 'cat-1',
     categoryName: 'Cyber Tech & Audio',
     brandId: 'brand-1',
@@ -79,9 +79,9 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=1200',
     ],
     variants: [
-      { id: 'v1', color: 'Midnight Black', colorHex: '#121212', size: 'One Size', sku: 'AURA-HD-BLK', price: 349.99, stock: 14 },
-      { id: 'v2', color: 'Space Silver', colorHex: '#D1D5DB', size: 'One Size', sku: 'AURA-HD-SLV', price: 349.99, stock: 8 },
-      { id: 'v3', color: 'Ember Orange', colorHex: '#FF6B35', size: 'One Size', sku: 'AURA-HD-ORG', price: 369.99, stock: 5 },
+      { id: 'v1', color: 'Midnight Black', colorHex: '#121212', size: 'One Size', sku: 'AURA-HD-BLK', price: 98500, stock: 14 },
+      { id: 'v2', color: 'Space Silver', colorHex: '#D1D5DB', size: 'One Size', sku: 'AURA-HD-SLV', price: 98500, stock: 8 },
+      { id: 'v3', color: 'Ember Orange', colorHex: '#FF6B35', size: 'One Size', sku: 'AURA-HD-ORG', price: 104500, stock: 5 },
     ],
     sizes: ['One Size'],
     colors: [
@@ -113,8 +113,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'Minimalist Titanium Ceramic Chronograph',
     slug: 'titanium-ceramic-chronograph',
     description: 'Precision Swiss automatic movement housed inside a aerospace-grade grade 5 titanium case with a scratch-proof matte ceramic bezel.',
-    price: 899.00,
-    compareAtPrice: 1150.00,
+    price: 248000,
+    compareAtPrice: 315000,
     categoryId: 'cat-2',
     categoryName: 'Luxury Timepieces',
     brandId: 'brand-1',
@@ -124,8 +124,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=1200',
     ],
     variants: [
-      { id: 'v2-1', color: 'Obsidian Black', colorHex: '#000000', size: '42mm', sku: 'WATCH-42-OBS', price: 899.00, stock: 6 },
-      { id: 'v2-2', color: 'Titanium Gray', colorHex: '#6B7280', size: '42mm', sku: 'WATCH-42-TIT', price: 899.00, stock: 4 },
+      { id: 'v2-1', color: 'Obsidian Black', colorHex: '#000000', size: '42mm', sku: 'WATCH-42-OBS', price: 248000, stock: 6 },
+      { id: 'v2-2', color: 'Titanium Gray', colorHex: '#6B7280', size: '42mm', sku: 'WATCH-42-TIT', price: 248000, stock: 4 },
     ],
     sizes: ['38mm', '42mm'],
     colors: [
@@ -154,8 +154,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'AURA Cyber Runner Low Top Sneakers',
     slug: 'aura-cyber-runner-sneakers',
     description: 'Futuristic responsive cushioning paired with recycled knit upper, reflective glassmorphic detailing, and high-grip Vibram sole.',
-    price: 219.00,
-    compareAtPrice: 260.00,
+    price: 59500,
+    compareAtPrice: 72000,
     categoryId: 'cat-4',
     categoryName: 'Performance Footwear',
     brandId: 'brand-3',
@@ -165,7 +165,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       'https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&q=80&w=1200',
     ],
     variants: [
-      { id: 'v3-1', color: 'Solar Orange / Black', colorHex: '#FF6B35', size: 'US 10', sku: 'RUN-10-ORG', price: 219.00, stock: 12 },
+      { id: 'v3-1', color: 'Solar Orange / Black', colorHex: '#FF6B35', size: 'US 10', sku: 'RUN-10-ORG', price: 59500, stock: 12 },
     ],
     sizes: ['US 8', 'US 9', 'US 10', 'US 11', 'US 12'],
     colors: [
@@ -193,8 +193,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'Monochrome Techwear Oversized Trench Coat',
     slug: 'techwear-oversized-trench-coat',
     description: 'Waterproof Gore-Tex Pro construction with magnetic Fidlock fasteners, hidden modular pocket system, and ergonomic storm collar.',
-    price: 480.00,
-    compareAtPrice: 580.00,
+    price: 132000,
+    compareAtPrice: 160000,
     categoryId: 'cat-3',
     categoryName: 'Haute Apparel & Outerwear',
     brandId: 'brand-4',
@@ -224,8 +224,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'Spatial VR Smart Glasses Titanium Edition',
     slug: 'spatial-vr-smart-glasses',
     description: 'Dual micro-OLED 4K displays per eye, ultra-wide field of view, ambient light sensors, spatial audio, and prescription lens attachment.',
-    price: 1299.00,
-    compareAtPrice: 1499.00,
+    price: 358000,
+    compareAtPrice: 415000,
     categoryId: 'cat-1',
     categoryName: 'Cyber Tech & Audio',
     brandId: 'brand-2',
@@ -255,8 +255,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'Handstitched Italian Leather Duffle Bag',
     slug: 'italian-leather-duffle-bag',
     description: 'Crafted in Florence from full-grain vegetable-tanned leather. Features brass hardware, padded laptop compartment, and reinforced shoulder strap.',
-    price: 420.00,
-    compareAtPrice: 520.00,
+    price: 115000,
+    compareAtPrice: 142000,
     categoryId: 'cat-5',
     categoryName: 'Leather Goods & Eyewear',
     brandId: 'brand-1',
@@ -284,8 +284,8 @@ export const INITIAL_PRODUCTS: Product[] = [
 ];
 
 export const INITIAL_COUPONS: Coupon[] = [
-  { id: 'c-1', code: 'AURA20', discountType: 'percentage', discountValue: 20, minOrderAmount: 100, expiryDate: '2026-12-31', isActive: true, usageCount: 412 },
-  { id: 'c-2', code: 'FREESHIP', discountType: 'fixed', discountValue: 15, minOrderAmount: 50, expiryDate: '2026-12-31', isActive: true, usageCount: 890 },
+  { id: 'c-1', code: 'AURA20', discountType: 'percentage', discountValue: 20, minOrderAmount: 25000, expiryDate: '2026-12-31', isActive: true, usageCount: 412 },
+  { id: 'c-2', code: 'FREESHIP', discountType: 'fixed', discountValue: 1500, minOrderAmount: 15000, expiryDate: '2026-12-31', isActive: true, usageCount: 890 },
   { id: 'c-3', code: 'WELCOME10', discountType: 'percentage', discountValue: 10, minOrderAmount: 0, expiryDate: '2026-12-31', isActive: true, usageCount: 120 },
 ];
 
@@ -334,8 +334,8 @@ export const INITIAL_REVIEWS: Review[] = [
 export const INITIAL_FLASH_SALE: FlashSaleCampaign = {
   id: 'fs-01',
   title: 'MIDNIGHT CYBER DROP',
-  subtitle: 'Exclusive discounts on flagship audio, footwear and timepieces.',
-  endTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(), // 48 hours from now
+  subtitle: 'Exclusive discounts on flagship audio, footwear and timepieces across Pakistan.',
+  endTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
   bannerImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1600',
   productIds: ['prod-1', 'prod-3'],
 };

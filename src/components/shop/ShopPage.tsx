@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Product, Category, Brand } from '../../types';
 import { ProductCard } from '../common/ProductCard';
 import { useCart } from '../../context/CartContext';
-import { SlidersHorizontal, Grid, List, RotateCcw, Search, Star, Check } from 'lucide-react';
+import { formatPKR } from '../../lib/currency';
+import { SlidersHorizontal, Grid, List, RotateCcw, Search, Star } from 'lucide-react';
 
 interface ShopPageProps {
   products: Product[];
@@ -24,7 +25,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({
   searchQuery,
 }) => {
   const { addToCart } = useCart();
-  const [maxPrice, setMaxPrice] = useState<number>(2000);
+  const [maxPrice, setMaxPrice] = useState<number>(500000);
   const [minRating, setMinRating] = useState<number>(0);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
@@ -35,7 +36,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({
   // RESET FILTERS
   const handleResetFilters = () => {
     onSelectCategory('all');
-    setMaxPrice(2000);
+    setMaxPrice(500000);
     setMinRating(0);
     setSelectedBrands([]);
     setInStockOnly(false);
@@ -96,11 +97,11 @@ export const ShopPage: React.FC<ShopPageProps> = ({
       <div className="glass-panel rounded-3xl p-8 mb-8 border border-white/20 dark:border-white/10 bg-gradient-to-r from-slate-900 via-[#131520] to-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6">
         <div>
           <span className="text-[11px] font-extrabold text-[#FF6B35] uppercase tracking-widest">
-            AURA CATALOGUE 2026
+            AURA LUXE CATALOGUE • PAKISTAN & GLOBAL
           </span>
           <h1 className="text-3xl font-black tracking-tight mt-1">Explore High-End Collection</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Showing {filteredProducts.length} curated luxury items with real-time stock sync.
+            Showing {filteredProducts.length} curated luxury items with real-time stock sync in PKR.
           </p>
         </div>
 
@@ -166,13 +167,13 @@ export const ShopPage: React.FC<ShopPageProps> = ({
           <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-slate-900 dark:text-white uppercase tracking-wider">Max Price</span>
-              <span className="text-[#FF6B35]">${maxPrice}</span>
+              <span className="text-[#FF6B35]">{formatPKR(maxPrice)}</span>
             </div>
             <input
               type="range"
-              min="50"
-              max="2000"
-              step="50"
+              min="10000"
+              max="500000"
+              step="5000"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-full accent-[#FF6B35] cursor-pointer"
@@ -264,6 +265,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({
               <div className="flex items-center rounded-xl glass-pill p-1 border border-slate-200 dark:border-slate-800">
                 <button
                   onClick={() => setViewMode('grid')}
+                  aria-label="Grid view"
                   className={`p-1.5 rounded-lg transition-colors ${
                     viewMode === 'grid' ? 'bg-[#FF6B35] text-white' : 'text-slate-500'
                   }`}
@@ -272,6 +274,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
+                  aria-label="List view"
                   className={`p-1.5 rounded-lg transition-colors ${
                     viewMode === 'list' ? 'bg-[#FF6B35] text-white' : 'text-slate-500'
                   }`}
@@ -288,7 +291,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({
               <p className="text-sm font-semibold text-slate-500">No luxury items match your current filters.</p>
               <button
                 onClick={handleResetFilters}
-                className="py-2.5 px-6 rounded-2xl bg-[#FF6B35] text-white font-bold text-xs"
+                className="py-2.5 px-6 rounded-2xl bg-[#FF6B35] text-white font-bold text-xs shadow-md"
               >
                 Clear All Filters
               </button>
@@ -317,13 +320,13 @@ export const ShopPage: React.FC<ShopPageProps> = ({
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-3 shrink-0">
-                    <span className="text-xl font-black text-slate-900 dark:text-white">${p.price.toFixed(2)}</span>
+                    <span className="text-xl font-black text-slate-900 dark:text-white">{formatPKR(p.price)}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         addToCart(p, 1);
                       }}
-                      className="py-2.5 px-5 rounded-2xl bg-[#FF6B35] text-white font-bold text-xs shadow-md hover:bg-[#E85A24]"
+                      className="py-2.5 px-5 rounded-2xl bg-[#FF6B35] text-white font-bold text-xs shadow-md hover:bg-[#E85A24] transition-colors"
                     >
                       Add to Bag
                     </button>

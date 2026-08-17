@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useNotification } from '../../context/NotificationContext';
+import { formatPKR } from '../../lib/currency';
 import { ShoppingBag, Star, ArrowRight, Trophy, Medal, Award } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -65,7 +66,7 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
             Most Loved by Clients
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md">
-            Ranked by verified purchase reviews from our global luxury community.
+            Ranked by verified purchase reviews from our luxury community in Pakistan and worldwide.
           </p>
         </div>
         <button
@@ -112,7 +113,7 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{top.description}</p>
             <div className="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-slate-800">
-              <span className="text-xl font-black text-[#FF6B35]">${top.price.toFixed(2)}</span>
+              <span className="text-xl font-black text-[#FF6B35]">{formatPKR(top.price)}</span>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => { e.stopPropagation(); addToCart(top, 1); showToast(`Added to cart`, top.title, 'success'); }}
@@ -159,7 +160,7 @@ export const BestSellers: React.FC<BestSellersProps> = ({ products, onQuickView,
                 </div>
 
                 <div className="text-right shrink-0">
-                  <p className="font-black text-base text-slate-900 dark:text-white">${product.price.toFixed(2)}</p>
+                  <p className="font-black text-base text-slate-900 dark:text-white">{formatPKR(product.price)}</p>
                   <button
                     onClick={(e) => { e.stopPropagation(); addToCart(product, 1); showToast('Added to cart', product.title, 'success'); }}
                     className="mt-1.5 p-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-[#FF6B35] dark:hover:bg-[#FF6B35] dark:hover:text-white transition-colors"

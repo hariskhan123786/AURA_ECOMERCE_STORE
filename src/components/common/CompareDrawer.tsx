@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCompare } from '../../context/CompareContext';
 import { useCart } from '../../context/CartContext';
+import { formatPKR } from '../../lib/currency';
 import { X, ShoppingBag, Star, Layers, Trash2 } from 'lucide-react';
 
 export const CompareDrawer: React.FC = () => {
@@ -80,7 +81,7 @@ export const CompareDrawer: React.FC = () => {
                     <Star className="w-3 h-3 fill-amber-400" />
                     <span>{product.rating}</span>
                   </div>
-                  <p className="font-extrabold text-sm text-slate-900 dark:text-white">${product.price.toFixed(2)}</p>
+                  <p className="font-extrabold text-sm text-slate-900 dark:text-white">{formatPKR(product.price)}</p>
                 </div>
 
                 <button

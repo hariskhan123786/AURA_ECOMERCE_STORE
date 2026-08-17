@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCompare } from '../../context/CompareContext';
 import { useNotification } from '../../context/NotificationContext';
+import { formatPKR } from '../../lib/currency';
 import { Heart, ShoppingBag, Eye, Star, Layers, AlertTriangle } from 'lucide-react';
 
 interface ProductCardProps {
@@ -58,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onQuickView && onQuickView(product)}
-      className={`group relative glass-panel rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-[#FF6B35]/35 hover:-translate-y-1.5 ${
+      className={`group relative glass-panel rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-[#FF6B35]/40 hover:-translate-y-1.5 ${
         isOutOfStock ? 'opacity-70' : ''
       }`}
     >
@@ -80,8 +81,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
         {/* Out of stock overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
-            <span className="px-3 py-1.5 rounded-full bg-slate-900/90 text-white text-xs font-bold tracking-wide">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20">
+            <span className="px-3 py-1.5 rounded-full bg-slate-900/90 text-white text-xs font-bold tracking-wide border border-white/10">
               Out of Stock
             </span>
           </div>
@@ -90,7 +91,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
         {/* Top Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
           {product.discountPercentage && product.discountPercentage > 0 ? (
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide uppercase bg-[#FF6B35] text-white shadow-lg shadow-[#FF6B35]/35">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide uppercase bg-[#FF6B35] text-white shadow-lg shadow-[#FF6B35]/40">
               -{product.discountPercentage}% OFF
             </span>
           ) : null}
@@ -100,7 +101,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             </span>
           )}
           {isLowStock && !isOutOfStock && (
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/90 text-white flex items-center gap-1 backdrop-blur-md">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/90 text-white flex items-center gap-1 backdrop-blur-md shadow-md">
               <AlertTriangle className="w-2.5 h-2.5" /> Only {product.stock} left
             </span>
           )}
@@ -111,6 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           <motion.button
             whileTap={{ scale: 0.8 }}
             onClick={handleToggleWishlist}
+            aria-label="Wishlist"
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md ${
               activeInWishlist
                 ? 'bg-[#FF6B35] text-white shadow-[#FF6B35]/30'
@@ -123,6 +125,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
           <motion.button
             whileTap={{ scale: 0.8 }}
             onClick={handleCompare}
+            aria-label="Compare"
             className="w-9 h-9 rounded-full bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-200 hover:text-[#FF6B35] flex items-center justify-center transition-all shadow-md backdrop-blur-md"
           >
             <Layers className="w-4 h-4" />
@@ -179,13 +182,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
 
         {/* Price & Add to Cart */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/60">
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-extrabold text-base text-slate-900 dark:text-white">
-              ${product.price.toFixed(2)}
+          <div className="flex flex-col">
+            <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white tracking-tight">
+              {formatPKR(product.price)}
             </span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-slate-400 line-through">
-                ${product.compareAtPrice.toFixed(2)}
+              <span className="text-[11px] text-slate-400 line-through">
+                {formatPKR(product.compareAtPrice)}
               </span>
             )}
           </div>
@@ -194,6 +197,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }
             whileTap={{ scale: 0.88 }}
             onClick={handleAddToCart}
             disabled={isOutOfStock}
+            aria-label="Add to cart"
             className={`p-2.5 rounded-xl transition-colors shadow-md ${
               isOutOfStock
                 ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'

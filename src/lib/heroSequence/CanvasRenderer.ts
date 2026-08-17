@@ -3,10 +3,11 @@
  *
  * Manages a single <canvas> element for rendering the frame sequence.
  * Features:
- *  - Retina / HiDPI support via devicePixelRatio
- *  - Letterbox to maintain source aspect ratio
+ *  - Edge-to-edge FULL SCREEN Cover mode (fills 100% viewport, zero black bars)
+ *  - High-fidelity image smoothing (`imageSmoothingQuality = 'high'`)
+ *  - Retina / HiDPI support up to 2.5x
  *  - Safe try/catch draw with dimension checks
- *  - ResizeObserver for dynamic viewport responsiveness
+ *  - Dynamic ResizeObserver for responsive viewports
  */
 
 export interface DrawRect {
@@ -37,10 +38,16 @@ export class CanvasRenderer {
     });
     if (!ctx) throw new Error('Could not get 2D canvas context');
     this.ctx = ctx;
-    this.dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2);
+    this.dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2.5);
 
+    this._setupQuality();
     this._attachResizeObserver();
     this._resize();
+  }
+
+  private _setupQuality() {
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
   }
 
   // ─── RESIZE ──────────────────────────────────────────────────
@@ -59,6 +66,7 @@ export class CanvasRenderer {
     this.canvas.width  = Math.round(w * this.dpr);
     this.canvas.height = Math.round(h * this.dpr);
     this.ctx.scale(this.dpr, this.dpr);
+    this._setupQuality();
     this.drawRect = this._calcDrawRect(w, h);
 
     if (this.currentSource) {
@@ -66,23 +74,26 @@ export class CanvasRenderer {
     }
   }
 
-  /** Calculate letterbox draw rect to maintain source aspect ratio */
+  /**
+   * Calculate FULL-SCREEN COVER draw rect (object-fit: cover)
+   * Fills 100% of the canvas without any letterbox or pillarbox bars.
+   */
   private _calcDrawRect(canvasW: number, canvasH: number): DrawRect {
     const canvasAspect = canvasW / canvasH;
     let dw: number, dh: number, dx: number, dy: number;
 
     if (canvasAspect > this.sourceAspect) {
-      // Fit height (pillarbox)
-      dh = canvasH;
-      dw = canvasH * this.sourceAspect;
-      dx = (canvasW - dw) / 2;
-      dy = 0;
-    } else {
-      // Fit width (letterbox)
+      // Screen is wider than video -> scale width to fill screen, crop top/bottom
       dw = canvasW;
       dh = canvasW / this.sourceAspect;
       dx = 0;
       dy = (canvasH - dh) / 2;
+    } else {
+      // Screen is taller than video -> scale height to fill screen, crop left/right
+      dh = canvasH;
+      dw = canvasH * this.sourceAspect;
+      dx = (canvasW - dw) / 2;
+      dy = 0;
     }
 
     return { sx: 0, sy: 0, sw: 0, sh: 0, dx, dy, dw, dh };
@@ -118,11 +129,8 @@ export class CanvasRenderer {
 
       const r = this.drawRect ?? this._calcDrawRect(cw, ch);
 
-      // Fill background black
-      this.ctx.fillStyle = '#000';
-      this.ctx.fillRect(0, 0, cw, ch);
-
-      // Draw current frame safely
+      // Draw high-quality cover frame
+      this._setupQuality();
       this.ctx.drawImage(source, r.dx, r.dy, r.dw, r.dh);
       this.currentSource = source;
     } catch (err) {

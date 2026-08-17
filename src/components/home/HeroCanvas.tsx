@@ -19,6 +19,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Sparkles, ShieldCheck, Star, ChevronDown } from 'lucide-react';
 import { Product } from '../../types';
+import { formatPKR } from '../../lib/currency';
 import { CanvasRenderer } from '../../lib/heroSequence/CanvasRenderer';
 import { useFrameSequence } from '../../hooks/useFrameSequence';
 import { useScrollSequence } from '../../hooks/useScrollSequence';
@@ -387,11 +388,11 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   padding: '5px 13px', borderRadius: 100,
                   background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)',
-                  color: 'rgba(255,255,255,0.6)', fontSize: 9.5, fontWeight: 600,
+                  color: 'rgba(255,255,255,0.7)', fontSize: 9.5, fontWeight: 600,
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                   fontFamily: "'Space Mono', monospace",
                 }}>
-                  <ShieldCheck size={10} style={{ color: '#34d399' }} /> Authenticity Guaranteed
+                  <ShieldCheck size={10} style={{ color: '#34d399' }} /> Authenticity Guaranteed • Nationwide Delivery
                 </span>
               </div>
 
@@ -595,9 +596,9 @@ export const HeroCanvas: React.FC<HeroCanvasProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{
                       fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em',
+                      fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em',
                     }}>
-                      ${activeProduct.price.toFixed(2)}
+                      {formatPKR(activeProduct.price)}
                     </span>
                     <span style={{
                       display: 'flex', alignItems: 'center', gap: 4,
